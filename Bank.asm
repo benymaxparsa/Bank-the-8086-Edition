@@ -117,6 +117,41 @@
 
     ENDM
 
+    ; ---------------------------------------------------INPUT_STR_CHANGE_ACC_NAME--------------------------------------------------
+
+    MACRO INPUT_STR_CHANGE_ACC_NAME STRING
+
+        LEA SI, STRING
+        CHANGE_NAME:
+            MOV AH, 1
+            INT 21H
+            CMP AL, 13
+            JE CONTINUE_TO_CHANGE_PASS
+            MOV [SI], AL
+            INC SI
+            JMP CHANGE_NAME
+
+    ENDM
+
+    ; ---------------------------------------------------INPUT_STR_CHANGE_ACC_PASS--------------------------------------------------
+
+
+    MACRO INPUT_STR_CHANGE_ACC_PASS STRING
+
+        LEA SI, STRING
+        MOV PASSWORD_SIZE, 0
+        CHANGE_PASS:
+            MOV AH, 1
+            INT 21H
+            CMP AL, 13
+            JE CONTINUE_TO_FINISH
+            INC PASSWORD_SIZE
+            MOV [SI], AL
+            INC SI
+            JMP CHANGE_PASS
+            
+    ENDM
+
     ;-----------------------------------------------------------MAIN---------------------------------------------------------------
 
     MAIN PROC
@@ -145,8 +180,8 @@
             CMP INPUT, '4'
             JE SHOW_ACC_INFO
 
-            ; CMP INPUT, '5'
-            ; JE CHANGE_ACC_INFO
+            CMP INPUT, '5'
+            JE CHANGE_ACC_INFO
 
             JMP SELECT_OPTION_LOOP
         
@@ -395,34 +430,34 @@
     ; ------------------------------------------------------------SHOW_ACC_INFO--------------------------------------------------------
         SHOW_ACC_INFO PROC
 
-         CALL CHECK_ACC_CREATED
-         CALL GET_PASSWORD
-         CALL CLEAR_CONSOLE
+            CALL CHECK_ACC_CREATED
+            CALL GET_PASSWORD
+            CALL CLEAR_CONSOLE
 
-         PRINTSTRING ACC_INFO_MSG
-         CALL NEWLINE
-         CALL NEWLINE
+            PRINTSTRING ACC_INFO_MSG
+            CALL NEWLINE
+            CALL NEWLINE
 
-         PRINTSTRING SEC3_PRINT_ACC_NAME
-         CALL NEWLINE
+            PRINTSTRING SEC3_PRINT_ACC_NAME
+            CALL NEWLINE
 
-         PRINTSTRING ACC_NAME
-         CALL NEWLINE
+            PRINTSTRING ACC_NAME
+            CALL NEWLINE
 
-         PRINTSTRING SEC3_PRINT_ACC_PASS
-         CALL NEWLINE
+            PRINTSTRING SEC3_PRINT_ACC_PASS
+            CALL NEWLINE
 
-         PRINTSTRING ACC_PASSWORD
-         CALL NEWLINE
+            PRINTSTRING ACC_PASSWORD
+            CALL NEWLINE
 
-         PRINTSTRING SEC3_PRINT_REMAINING_BALANCE
-         CALL NEWLINE
+            PRINTSTRING SEC3_PRINT_REMAINING_BALANCE
+            CALL NEWLINE
 
-         MOV AX,ACC_BALANCE
-         CMP AX,0
-         JE NO_MONEY
-         CALL SHOW_NUMBER_IN_DECIMAL
-         CALL NEWLINE
+            MOV AX,ACC_BALANCE
+            CMP AX,0
+            JE NO_MONEY
+            CALL SHOW_NUMBER_IN_DECIMAL
+            CALL NEWLINE
 
         CALL INPUT_CHEK_ENTER
 
@@ -431,15 +466,8 @@
             PRINTSTRING SEC3_PRINT_NO_MONEY
             CALL NEWLINE
             CALL INPUT_CHEK_ENTER
-            
-
 
         RET
-
-
-
-
-
 
         SHOW_ACC_INFO ENDP
 
@@ -501,6 +529,76 @@
 
     SELECT_MONEY ENDP
 
+    ;----------------------------------------------------------SHOW_NUMBER_IN_DECIMAL------------------------------------------------------
+
+    SHOW_NUMBER_IN_DECIMAL PROC
+
+        MOV CX, 0
+        MOV DX, 0
+
+        PART1:
+
+            CMP AX, 0
+            JE PART2
+
+            MOV BX, 10
+            DIV BX
+            PUSH DX
+
+            INC CX
+
+            XOR DX, DX
+            JMP PART1
+
+        PART2:
+
+            CMP CX, 0
+            JE EXIT_NUMBER_PRINT
+
+            POP DX
+            ADD DX, 48
+
+            MOV AH, 02H
+            INT 21H
+
+            DEC CX
+            JMP PART2
+        
+        EXIT_NUMBER_PRINT:
+            RET
+
+
+    SHOW_NUMBER_IN_DECIMAL ENDP
+
+
+    ;----------------------------------------------------------CHANGE_ACC_INFO------------------------------------------------------
+
+    CHANGE_ACC_INFO PROC
+
+        CALL CHECK_ACC_CREATED
+        CALL GET_PASSWORD
+        CALL CLEAR_CONSOLE
+
+        PRINTSTRING CHANGE_ACC_INFO_MSG
+        CALL NEWLINE
+        CALL NEWLINE
+
+        PRINTSTRING SEC4_CHANGE_NAME
+        INPUT_STR_CHANGE_ACC_NAME ACC_NAME
+
+        CONTINUE_TO_CHANGE_PASS:
+            CALL NEWLINE
+            PRINTSTRING SEC4_CHANGE_PASS
+            INPUT_STR_CHANGE_ACC_PASS ACC_PASSWORD
+
+        CONTINUE_TO_FINISH:
+            CALL NEWLINE
+            PRINTSTRING SEC4_DONE_MSG
+            CALL INPUT_CHEK_ENTER
+    
+        RET
+
+    CHANGE_ACC_INFO ENDP
 
 END MAIN
 
