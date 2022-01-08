@@ -139,11 +139,11 @@
             CMP INPUT, '2'
             JE DEPOSIT_MONEY
 
-            ; CMP INPUT, '3'
-            ; JE WITHDRAW_MONEY
+            CMP INPUT, '3'
+            JE WITHDRAW_MONEY
 
-            ; CMP INPUT, '4'
-            ; JE SHOW_ACC_INFO
+            CMP INPUT, '4'
+            JE SHOW_ACC_INFO
 
             ; CMP INPUT, '5'
             ; JE CHANGE_ACC_INFO
@@ -321,6 +321,127 @@
         RET
 
     DEPOSIT_MONEY ENDP
+    ; -------------------------------------------------------------WITHDRAW_MONEY----------------------------------------------------
+    WITHDRAW_MONEY PROC 
+
+       CALL CHECK_ACC_CREATED
+       CALL GET_PASSWORD
+       CALL CLEAR_CONSOLE
+
+        PRINTSTRING WITHDRAW_MSG
+        CALL NEWLINE
+        CALL NEWLINE
+        
+        PRINTSTRING SEC2_ONE
+        CALL NEWLINE
+        PRINTSTRING SEC2_TWO
+        CALL NEWLINE
+        PRINTSTRING SEC2_THREE
+        CALL NEWLINE
+        PRINTSTRING SEC2_FOUR
+        CALL NEWLINE
+
+        CALL SELECT_MONEY
+
+        CMP SELECT_MONEY_VAL, '1'
+        JE SUB_ONE_TOMAN
+
+        CMP SELECT_MONEY_VAL, '2'
+        JE SUB_FIVE_TOAMN
+
+        CMP SELECT_MONEY_VAL, '3'
+        JE SUB_TEN_TOMAN
+
+        CMP SELECT_MONEY_VAL, '4'
+        JE SUB_FIFTY_TOMAN
+
+        SUB_ONE_TOMAN:
+            MOV DX,ACC_BALANCE
+            CMP DX,1000
+            JB NOT_ENOUGH
+            SUB ACC_BALANCE, 1000
+            JMP SELECT_OPTION_LOOP
+
+        SUB_FIVE_TOAMN:
+            MOV DX,ACC_BALANCE
+            CMP DX,5000
+            JB NOT_ENOUGH
+            SUB ACC_BALANCE, 5000
+            JMP SELECT_OPTION_LOOP
+
+        SUB_TEN_TOMAN:
+            MOV DX,ACC_BALANCE
+            CMP DX,10000
+            JB NOT_ENOUGH
+            SUB ACC_BALANCE, 10000
+            JMP SELECT_OPTION_LOOP
+
+        SUB_FIFTY_TOMAN:
+            MOV DX,ACC_BALANCE
+            CMP DX,50000
+            JB NOT_ENOUGH
+            SUB ACC_BALANCE, 50000
+            JMP SELECT_OPTION_LOOP
+
+        NOT_ENOUGH:
+            CALL NEWLINE
+            PRINTSTRING SEC2_BALANCE_OVERFLOW
+            CALL CHECK_ENTER_LOOP
+        RET
+
+    
+    WITHDRAW_MONEY ENDP
+
+    ; ------------------------------------------------------------SHOW_ACC_INFO--------------------------------------------------------
+        SHOW_ACC_INFO PROC
+
+         CALL CHECK_ACC_CREATED
+         CALL GET_PASSWORD
+         CALL CLEAR_CONSOLE
+
+         PRINTSTRING ACC_INFO_MSG
+         CALL NEWLINE
+         CALL NEWLINE
+
+         PRINTSTRING SEC3_PRINT_ACC_NAME
+         CALL NEWLINE
+
+         PRINTSTRING ACC_NAME
+         CALL NEWLINE
+
+         PRINTSTRING SEC3_PRINT_ACC_PASS
+         CALL NEWLINE
+
+         PRINTSTRING ACC_PASSWORD
+         CALL NEWLINE
+
+         PRINTSTRING SEC3_PRINT_REMAINING_BALANCE
+         CALL NEWLINE
+
+         MOV AX,ACC_BALANCE
+         CMP AX,0
+         JE NO_MONEY
+         CALL SHOW_NUMBER_IN_DECIMAL
+         CALL NEWLINE
+
+        CALL INPUT_CHEK_ENTER
+
+
+        NO_MONEY:
+            PRINTSTRING SEC3_PRINT_NO_MONEY
+            CALL NEWLINE
+            CALL INPUT_CHEK_ENTER
+            
+
+
+        RET
+
+
+
+
+
+
+        SHOW_ACC_INFO ENDP
 
     ;------------------------------------------------------------CHECK_ACC_CREATED------------------------------------------------------
 
