@@ -64,6 +64,45 @@
 
 .CODE
 
+    ; -----------------------------------------------------------MACROS--------------------------------------------------------------
+     
+        ;  -----------------------------------------------------------PRINT STRING------------------------------------------------------
+    MACRO PRINTSTRING STRING 
+        MOV AH,9
+        LEA DX,STRING
+        INT 21H
+    ENDM
+    ; -----------------------------------------------------------INPUT STRING FOR CREATE ACCOUNT-------------------------------------
+     MACRO INPUT_STR_CRT_ACC_USER STRING
+        LEA SI,STRING
+        GET_INPUT: 
+            MOV AH,1
+            INT 21H
+            CMP AL,13
+            JE CRT_ACC_GET_PASS_LOOP
+            MOV [SI],AL
+            INC SI
+            JMP GET_INPUT
+        EXIT_MACRO:
+            RET
+    ENDM
+    ; ----------------------------------------------------------------INPUTSTRING CEATE ACCOUNT PASSWORD------------------------------
+     MACRO  INPUT_STR_CRT_ACC_PASS STRING
+        LEA SI,STRING
+        GET_INPUT_PASS:
+            MOV AH,1
+            INT 21H
+            CMP AL,13
+            JE CRT_ACC_DONE
+            INC PASSWORD_SIZE
+            MOV [SI],AL
+            INC SI
+            JMP GET_INPUT_PASS
+        EXIT_PASS:
+            RET
+    ENDM
+
+
     ;-----------------------------------------------------------MAIN---------------------------------------------------------------
 
     MAIN PROC
@@ -108,6 +147,15 @@
     
     MAIN ENDP
 
+    ; -----------------------------------------------------------NEW LINE----------------------------------------------------------
+     NEWLINE PROC NEAR
+        MOV AH,2
+        MOV DL,10
+        INT 21H
+        MOV DL,13
+        INT 21H
+        RET
+    NEWLINE ENDP
     ;----------------------------------------------------------CLEAR_CONSOLE------------------------------------------------------
 
     CLEAR_CONSOLE PROC NEAR
@@ -155,7 +203,39 @@
         RET
     INPUT_FOR_OPTIONS ENDP
 
-    ;----------------------------------------------------------INPUT_FOR_OPTIONS------------------------------------------------------
+    ;----------------------------------------------------------CREATE ACCOUNT------------------------------------------------------
+    
+    CREATE_ACC PROC 
+        CALL CLEAR_CONSOLE
+        PRINTSTRING CREATE_MSG
+        PRINTSTRING SEC1_ENTER_MSG
+        INPUT_STR_CRT_ACC_USER ACC_NAME
+
+        CRT_ACC_GET_PASS_LOOP:
+            CALL NEWLINE
+            PRINTSTRING SEC1_PASS_MSG
+            INPUT_STR_CRT_ACC_PASS ACC_PASSWORD
+
+        CRT_ACC_DONE:
+            CALL NEWLINE
+            PRINTSTRING SEC1_DONE_MSG
+            CALL INPUT_CHEK_ENTER
+        
+
+        RET
+
+    CREATE_ACC ENDP
+
+    INPUT_CHEK_ENTER PROC
+        CHECK_ENTER_LOOP:
+            MOV AH,1
+            INT 21H
+            CMP AL,13
+            JE SELECT_OPTION_LOOP
+            JMP CHECK_ENTER_LOOP
+        RET
+    INPUT_CHEK_ENTER ENDP
+    
 
 
 END MAIN
